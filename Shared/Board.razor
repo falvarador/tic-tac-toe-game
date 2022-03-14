@@ -1,0 +1,179 @@
+@{
+    string status;
+
+    switch (gameStatus)
+    {
+        case GameStatus.Start:
+            status = $"Click en JUGAR!";
+            break;
+        case GameStatus.InitState:
+            status = $"Selecciona una ficha!";
+            break;
+        case GameStatus.XWins:
+            status = $"Gana: {GameMarks.X}";
+            break;
+        case GameStatus.OWins:
+            status = $"Gana: {GameMarks.O}";
+            break;
+        case GameStatus.Draw:
+            status = "Empate!";
+            break;
+        default:
+            char nextPlayer = movement == GameMarks.X ? GameMarks.X : GameMarks.O;
+            status = $"Siguiente jugador: {nextPlayer}";
+            break;
+    }
+
+    <h3>@status</h3>
+}
+
+<section class="board-content">
+
+    <div class="board">
+        @for (int i = 0; i < 9; i++)
+        {
+            int squareNumber = i;
+            <Square @key=squareNumber value=squares[squareNumber] ClickHandler="@(() => HandleClick(squareNumber))" />
+        }
+    </div>
+
+    <div class="game-mark-content">
+        <span class="@((player == GameMarks.X) ? "game-mark-active" : "") game-mark"
+            @onclick="@(() => SelectMarkHandler(GameMarks.X))">@GameMarks.X</span>
+        <span class="@((player == GameMarks.O) ? "game-mark-active" : "") game-mark"
+            @onclick="@(() => SelectMarkHandler(GameMarks.O))">@GameMarks.O</span>
+    </div>
+
+    <button class="btn" @onclick="PlayOrPauseGameHandler">
+        @(gameStatus == GameStatus.InitState || gameStatus == GameStatus.Start ? "JUGAR" : "REINICIAR")
+    </button>
+
+</section>
+
+@code {
+    private char player;
+    private char computer;
+    private char movement;
+
+    private char[] squares = new char[9];
+    private char[] randomMarks = new[] { GameMarks.X, GameMarks.O };
+
+    Random random = new();
+    GameStatus gameStatus;
+
+    protected override void OnInitialized()
+    {
+        InitState();
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        base.OnAfterRender(firstRender);
+
+        if (firstRender)
+            return;
+        else if (gameStatus != GameStatus.InitState && gameStatus != GameStatus.Start)
+            gameStatus = GameProgram.CalculateGameStatus(squares);
+
+        MovementAIHandler();
+    }
+
+    private void HandleClick(int i)
+    {
+        if (gameStatus == GameStatus.InitState || gameStatus == GameStatus.Start)
+            return;
+
+        if (squares[i] != ' ')
+            return;
+
+        bool isGameFiniched = GameProgram.CalculateGameStatus(squares) != GameStatus.NotYetFiniched;
+
+        if (isGameFiniched)
+            return;
+
+        squares[i] = player;
+
+        movement = (movement == GameMarks.X ? GameMarks.O : GameMarks.X);
+    }
+
+    private void SelectMarkHandler(char mark)
+    {
+        player = mark;
+        computer = (mark == GameMarks.X ? GameMarks.O : GameMarks.X);
+
+        gameStatus = GameStatus.Start;
+    }
+
+    private void PlayOrPauseGameHandler()
+    {
+        if (player == GameMarks.Blank)
+            return;
+
+        if (gameStatus != GameStatus.InitState && gameStatus != GameStatus.Start)
+        {
+            InitState();
+            return;
+        }
+
+        movement = randomMarks[random.Next(randomMarks.Length)];
+
+        gameStatus = GameStatus.NotYetFiniched;
+
+        MovementAIHandler();
+    }
+
+    private void MovementAIHandler()
+    {
+        if (gameStatus == GameStatus.InitState || gameStatus == GameStatus.Start)
+            return;
+
+        if (movement == computer)
+        {
+            var interval = random.Next(1, 3);
+
+            SetTimeOut(interval * 1000, MovementAI);
+        }
+    }
+
+    private void MovementAI(object obj)
+    {
+        bool isGameFiniched = GameProgram.CalculateGameStatus(squares) != GameStatus.NotYetFiniched;
+
+        if (isGameFiniched)
+        {
+            StateHasChanged();
+            return;
+        }
+
+        int i = random.Next(0, 8);
+
+        while (squares[i] != GameMarks.Blank)
+            i = random.Next(0, 8);
+
+        squares[i] = computer;
+        movement = (movement == GameMarks.X ? GameMarks.O : GameMarks.X);
+
+        StateHasChanged();
+    }
+
+    private void SetTimeOut(int countdown, TimerCallback callback)
+    {
+        var timer = new Timer(callback, null, countdown, 0);
+    }
+
+    private void InitState()
+    {
+        player = GameMarks.Blank;
+        computer = GameMarks.Blank;
+        movement = GameMarks.Blank;
+
+        gameStatus = GameStatus.InitState;
+
+        squares = new char[9]
+        {
+' ', ' ', ' ',
+' ', ' ', ' ',
+' ', ' ', ' '
+        };
+    }
+}

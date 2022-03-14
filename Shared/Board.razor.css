@@ -1,0 +1,75 @@
+.board {
+  background-color: #34495e;
+  border-radius: 10px;
+  border: 6px solid #2c3e50;
+  color: #fff;
+  display: grid;
+  grid-template: repeat(3, 1fr) / repeat(3, 1fr);
+  height: 600px;
+  margin: 0 auto;
+  width: 600px;
+}
+
+.board-content {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 2rem;
+  width: 100%;
+}
+
+button {
+  background-color: #34495e;
+  border-color: #659dab;
+  border-radius: 5px;
+  border-style: solid;
+  border-width: 2px;
+  color: #fff;
+  display: inline-block;
+  font-size: 1.5rem;
+  height: 4rem;
+  line-height: 30px;
+  padding: 13px;
+  text-align: center;
+  text-decoration: none;
+  text-indent: 0px;
+  vertical-align: middle;
+  width: 16rem;
+}
+
+button:active {
+  position: relative;
+  top: 3px;
+}
+
+button:hover {
+  background-color: #2c3e50;
+}
+
+.game-mark-content {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.game-mark {
+  border-radius: 2px;
+  border: 6px solid #2c3e50;
+  cursor: pointer;
+  font-size: var(--font-size-xl);
+  font-weight: bold;
+  margin: 1rem;
+  width: 15%;
+}
+
+.game-mark-active {
+  background-color: #2c3e50;
+  color: var(--light-color);
+}
+
+.game-mark:hover {
+  background-color: #2c3e50;
+  color: var(--light-color);
+}
