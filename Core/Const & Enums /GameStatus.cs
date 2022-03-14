@@ -4,6 +4,6 @@ public enum GameStatus
     InitState,
     NotYetFiniched,
     OWins,
-    Start,
+    WaitForStart,
     XWins
 }
